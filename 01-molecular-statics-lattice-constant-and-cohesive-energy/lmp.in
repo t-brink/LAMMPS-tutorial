@@ -1,0 +1,140 @@
+# This is the LAMMPS input file. Lines starting with "#" are comments
+# and are ignored by LAMMPS.
+
+# Setup ################################################################
+
+# First, we need to tell LAMMPS that we want to work on a
+# three-dimensional system. Two dimensional is also possible, but out
+# of scope for this tutorial.
+dimension          3
+
+# Next, boundary conditions. Here, we want to have a bulk material,
+# thus we use periodic boundary conditions in all directions. The must
+# useful choices for boundary conditions are "p"eriodic, "f"ixed, and
+# "s"hrink-wrap. The latter two represent open boundaries. With "f",
+# the boundary does not change and with "s" the simulation box will be
+# adjusted to fit all atoms inside. That is often preferable.
+boundary           p p p
+
+# LAMMPS can work in different unit system, but we are constrained by
+# the units used in the potential input file. In materials science,
+# most people and virtually all potentials use "metal" units. Have a
+# look at the LAMMPS documentation what the units are for different
+# properties, because this is not a very consistent scheme (like SI).
+units              metal
+
+# There are different "atom_style"s, of which "atomic" is the
+# default. Here, atoms have an ID, a type (which element it is) with
+# associated mass, a position, and a velocity. This will be enough for
+# most cases.
+atom_style         atomic
+
+# Physics of the system ################################################
+
+# Here, we read the initial positions and velocities of our
+# atoms. LAMMPS can read gzipped files, but this often fails when
+# using MPI, where workarounds might be needed (or just use a plain,
+# non-zipped file).
+#
+# The format of the data file is given by atom_style. Check the
+# documentation for details. For now, ASE has done the work for us of
+# creating and formatting this input file.
+read_data          Cu-fcc.data.gz
+
+# We need to always set the mass of all elements, even if it plays no
+# role. For example, for most molecular statics algorithms, the mass
+# is simply ignored, since there are no kinetics at play.
+#
+# Atom types are numbers that are mapped to real elements (or fantasy
+# particles if you so choose) by assigning the correct mass and
+# potential parameters. For the mass, I usually just take the average
+# from the periodic table. I like to add a comment at the end to
+# remember what element it is, but this is optional.
+mass               1  63.546 # Cu
+
+# Now the heart of any classical MD simulation: The potential. You
+# need to first provide the type of "style" of the potential.
+pair_style         eam/alloy
+
+# Then come the parameters. For some simple potential styles, you can
+# give the parameters directly here. But most are read from a file
+# (have a look at this one and decide for yourself if you want to type
+# that into the input script).
+#
+# The first two parameters decide to which interactions this potential
+# is applied. "* *" means "all", which is what we want in 99% of
+# cases. Then comes the name of the potential file. Finally, the
+# element name (as listed in the potential file) must be listed for
+# each atom type we have. Here, we only have one type and it is
+# copper.
+pair_coeff         * * ../Cu01.eam.alloy Cu
+
+# Output ###############################################################
+
+# Output in LAMMPS comes in two forms (well, there are some more, but
+# we'll ignore this for now). One is the log file, which contains all
+# the commands in the input file and whatever the command decides to
+# write to the log file.
+#
+# Most importantly, any molecular statics/dynamics run will output
+# average thermodynamic data. What data will be there can be set as
+# shown below. I prefer this output, since it contains everything I
+# usually want to know. Check the documentation for the meaning. Take
+# note of "cpu" and "cpuremain", which tell you how much real time has
+# elapsed during the simulation and an estimation of how much time is
+# left to finish.
+#
+# The ampersand (&) is a line-continuation character. All commands
+# must be on one line, but if this becomes to long, you can use the
+# ampersand.
+thermo_style       custom step temp pe ke etotal enthalpy press vol    &
+                   lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
+                   cpu cpuremain
+
+# Some modifications to the output:
+#    "norm no"   - always report total energy etc., never per atom
+#    "flush yes" - do not buffer output (if this is omitted, the log file
+#                  might be incomplete until the simulation is finished;
+#                  it is less efficient for I/O, though)
+thermo_modify   norm no  flush yes
+
+# How often should thermodynamic data be written. Given in
+# timesteps. Make this as small as necessary, but not too small,
+# otherwise the log file is way too big and how-density data is
+# useless in most cases.
+#
+# As a rule of thumb, I use "10" for molecular statics and "100" for
+# molecular dynamics, except for very long simulations, where I use
+# "1000".
+thermo          10
+
+# Run ##################################################################
+
+# By default, LAMMPS will not change the simulation box size (except
+# for "s" boundaries as described in the manual). But, if we want to
+# obtain a lattice constant, we need to optimize the box, too.
+#
+# For this, we have "fixes", which modify the simulation in some
+# way. Here, we want box/relax.
+#
+# The first argument is a name. Customarily, fixes that are not
+# referenced again later can be just numbered. This is a question of
+# taste.
+#
+# The second argument determines which group is affected by the
+# fix. By default, a group named "all" exists, which encompasses all
+# atoms.
+#
+# The third argument is the fix type, here "box/relax".
+#
+# This specific fix now needs to be told in what ways the simulation
+# box should be relaxed. Here, I chose a target pressure of zero,
+# which is targeted individually for x, y, and z. Please do look at
+# the documentation and play around with this to see the effect!
+fix             1 all box/relax aniso 0
+
+# Finally, we do the actual molecular statics run. The first two
+# arguments are the convergance criteria for energy and force, the
+# latter two the maximum number of steps and force evaluations. See
+# documentation for details.
+minimize        1e-10 1e-10 100000 1000000

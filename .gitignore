@@ -1,0 +1,5 @@
+*~
+.*.swp
+
+/01-molecular-statics-lattice-constant-and-cohesive-energy/Cu-fcc.data.gz
+/*/log.lammps
