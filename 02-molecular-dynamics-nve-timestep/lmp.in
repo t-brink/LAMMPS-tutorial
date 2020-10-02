@@ -1,0 +1,75 @@
+# A molecular dynamics simulation. Only new concepts are documented,
+# for everything else see step 1 or the LAMMPS docs.
+
+# Setup ################################################################
+
+dimension          3
+boundary           p p p
+units              metal
+atom_style         atomic
+
+# Physics of the system ################################################
+
+# Re-use the input file from the last step.
+read_data          ../01-molecular-statics-lattice-constant-and-cohesive-energy/Cu-fcc.data.gz
+
+mass               1  63.546 # Cu
+
+pair_style         eam/alloy
+pair_coeff         * * ../Cu01.eam.alloy Cu
+
+# For dynamics, we need a time integration algorithm. This here is the
+# default style, a velocity Verlet. We will likely never need anything
+# else and can omit this option if we like.
+run_style          verlet
+
+# In addition to the other settings, molecular dynamics is a numeric
+# time integration with discrete time steps. We need to choose a time
+# step length that is not too big, otherwise the numerical errors will
+# be too big. But if the time step is too small, our simulation will
+# take longer. We need to find a compromise.
+#
+# Rigorous determination of an optimal time step is outside the scope
+# of this tutorial. Some rules of thumb are to use something on the
+# order of 1 fs for simulations with realistic atoms. Some people say
+# this should be around 1/100 of a typical vibrational period, so it
+# must be smaller for lighter elements.
+timestep           0.002
+
+# Output ###############################################################
+
+thermo_style       custom step temp pe ke etotal enthalpy press vol    &
+                   lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
+                   cpu cpuremain
+thermo_modify      norm no  flush yes
+thermo             100
+
+# Run ##################################################################
+
+# While we set the style of the time integration further up
+# ("run_style"), the actual time integration will only be performed if
+# a fix that implements integration is applied.
+#
+# With this fix, we can also choose the thermodynamic ensemble in
+# which our simulation lives. Classical molecular dynamics uses
+# Newtonian mechanics and the forces of the potentials are
+# conservative, meaning a simple implementation of MD will be in the
+# microcanonical or NVE ensemble. This is provided in the aptly-named
+# "nve" fix.
+fix             1 all nve
+
+# The input file we use has all atom velocities set to zero. This will
+# be quite a boring simulation, so we intialize the velocities
+# according to a Maxwell–Boltzmann distribution appropriate for T = 300K.
+# Luckily, LAMMPS has a command for that.
+#
+# The last number is a random seed. Change it to obtain a different,
+# statistically equivalent, initial distribution of velocities.
+velocity        all create 300.0  8727782
+
+# Now that we have set up the fixes and inserted some kinetic energy
+# into the system, we can start the simulation. We just need to
+# provide the number of time steps we want to perform. Multiply this
+# number by the length of a single time step to obtain the physical
+# time this corresponds to.
+run             100000
