@@ -96,7 +96,7 @@ thermo_style       custom step temp pe ke etotal enthalpy press vol    &
 #    "flush yes" - do not buffer output (if this is omitted, the log file
 #                  might be incomplete until the simulation is finished;
 #                  it is less efficient for I/O, though)
-thermo_modify   norm no  flush yes
+thermo_modify      norm no  flush yes
 
 # How often should thermodynamic data be written. Given in
 # timesteps. Make this as small as necessary, but not too small,
@@ -106,7 +106,7 @@ thermo_modify   norm no  flush yes
 # As a rule of thumb, I use "10" for molecular statics and "100" for
 # molecular dynamics, except for very long simulations, where I use
 # "1000".
-thermo          10
+thermo             10
 
 # Run ##################################################################
 
@@ -131,10 +131,10 @@ thermo          10
 # box should be relaxed. Here, I chose a target pressure of zero,
 # which is targeted individually for x, y, and z. Please do look at
 # the documentation and play around with this to see the effect!
-fix             1 all box/relax aniso 0
+fix                1 all box/relax aniso 0
 
 # Finally, we do the actual molecular statics run. The first two
 # arguments are the convergance criteria for energy and force, the
 # latter two the maximum number of steps and force evaluations. See
 # documentation for details.
-minimize        1e-10 1e-10 100000 1000000
+minimize           1e-10 1e-10 100000 1000000
