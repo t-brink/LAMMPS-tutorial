@@ -1,0 +1,111 @@
+# Setup ################################################################
+
+dimension          3
+
+# Here, we follow the convention in Frolov and Mishin, Phys. Rev. B 85,
+# 224107 (2012): The tilt axis of the grain boundary is in x direction
+# and the grain boundary plane normal in z direction.
+boundary           p p s
+units              metal
+atom_style         atomic
+
+# Physics of the system ################################################
+
+read_data          S5-100-210.data.gz
+
+mass               1  63.546 # Cu
+
+pair_style         eam/alloy
+pair_coeff         * * ../Cu01.eam.alloy Cu
+
+# Output ###############################################################
+
+# We will now compute the excess properties of the grain boundary as
+# defined in the Frolov/Mishin paper cited above.
+
+# First, we need the cohesive energy of fcc copper as computed in step 1.
+variable           Ecoh equal FILLHERE # in eV/atom
+
+# The grain boundary energy is defined as the excess energy over fcc
+# copper in a sufficiently large region around the grain boundary. It
+# is normalized by grain boundary area.
+#
+# So, first define a region which contains the grain boundary. The
+# input file is made such that the grain boundary is at the origin
+# (0,0,0). In x and y direction, the region goes to the box boundary,
+# but in z direction we do not want to include the surfaces. Otherwise
+# we would include a surface energy in the computation.
+region             gb block  EDGE EDGE  EDGE EDGE  -20 20
+
+# This group command assigns all atoms that are currently in the
+# region called "gb" to the group called "gbgrp". Atoms that later
+# leave/enter the region are not removed/added to the group.
+group              gbgrp region gb
+
+# We need the potential energy per atom. "pe" is the name of the compute.
+compute            pe all pe/atom
+
+# Get the sum of potential energies around the grain boundary. This
+# reference the previous compute "pe". LAMMPS is a bit weird here and
+# requires the prefix "c_" for all computes, "v_" for variables, and
+# "f_" for fixes.
+compute            gbpe gbgrp reduce sum c_pe
+
+# Now we need to subtract the reference fcc energy. If the formula for
+# the variable contains spaces, it needs to be in quotes.
+#
+# The function "count()" return the number of atoms in the group.
+#
+# lx and ly are the box lengths in x and y.
+#
+# The factor at the end converts from eV/Å² to J/m².
+variable           Egb equal "(c_gbpe - count(gbgrp)*v_Ecoh) / (lx * ly) * 16.021766"
+
+# We can also compute the excess stresses of the grain boundary as
+# defined in the Frolov/Mishin paper.
+#
+# LAMMPS conveniently provides the stress per atom. This has big
+# caveats, though. First, a stress per atom is not well defined and
+# needs to be averaged. Second, the output is actually stress × volume,
+# since the atomic volume would be needed to report a stress. This,
+# too, is not well defined.
+#
+# Here, we are in luck. The formula for a system without externally
+# applied stress or strain is τ_ij = σ_ij × V / A, where σ_ij is the
+# stress tensor in the grain boundary region, V is the volume of that
+# region, and A is the grain boundary area. We get σ_ij × V directly
+# from the compute.
+#
+# For the final argument of NULL, see LAMMPS docs.
+compute            stress all stress/atom NULL
+
+# Sum up and divide by grain boundary area. The final factor converts
+# from bar × Å to J/m².
+compute            xx gbgrp reduce sum c_stress[1]
+variable           tau11 equal "c_xx / (lx * ly) * 1e-5"
+
+compute            yy gbgrp reduce sum c_stress[2]
+variable           tau22 equal "c_yy / (lx * ly) * 1e-5"
+# For symmetric grain boundaries, the other components are zero. See,
+# again, the Frolov/Mishin paper.
+
+# We add the values computed above to the thermo output.
+thermo_style       custom step temp pe ke etotal enthalpy press vol    &
+                   lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
+                   v_Egb v_tau11 v_tau22                               &
+                   cpu cpuremain
+thermo_modify      norm no  flush yes
+thermo             100
+
+# Run ##################################################################
+
+# In this case, the directions in the grain boundary plane need to be
+# kept fixed. This is to avoid a change of lattice constant due to
+# stress in the grain boundary, which would then lead to size effects
+# depending on how much bulk fcc structure there is. Normal to the
+# plane, we have open surfaces, which allow expansion of the grain
+# boundary.
+minimize           1e-10 1e-10 100000 1000000
+
+# We can write a data file of the current simulation state.
+write_data         minimized.data
