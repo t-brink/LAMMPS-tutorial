@@ -12,7 +12,7 @@ air, which is at a given temperature and pressure and will tend
 towards equilibrium with our experiment.
 
 Since we do not want to model the whole room, we make some assumptions
-(this is basic thermodynamics). We assume the the room serves as a
+(this is basic thermodynamics): We assume that the room serves as a
 reservoir of heat and volume and that the temperature and pressure
 properties of the room do not change when equilibrating with the
 experiment (the room is infinitely big). If we were theoreticians, we
