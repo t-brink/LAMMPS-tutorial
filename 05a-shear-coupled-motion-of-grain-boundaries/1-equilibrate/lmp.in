@@ -1,0 +1,39 @@
+dimension          3
+boundary           p p s
+units              metal
+atom_style         atomic
+
+# Physics of the system ################################################
+
+read_data          ../../01a-molecular-statics-grain-boundaries/S5-100-210.data.gz
+
+# The unit cell is a bit too small for shear coupled motion simulations.
+replicate          3 3 1
+
+mass               1  63.546 # Cu
+
+pair_style         eam/alloy
+pair_coeff         * * ../../Cu01.eam.alloy Cu
+
+timestep           0.002
+
+# Output ###############################################################
+
+thermo_style       custom step temp pe ke etotal enthalpy press vol    &
+                   lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
+                   cpu cpuremain
+thermo_modify      norm no  flush yes
+thermo             100
+
+dump               MyDump all custom 10000 structure.dump.*.gz         &
+                   id type x y z vx vy vz ix iy iz
+dump_modify        MyDump pad 10
+
+# Run ##################################################################
+
+velocity           all create 1000.0  489279
+fix                1 all npt temp 500 500 0.1 x 0 0 1.0 y 0 0 1.0
+
+run                100000
+
+write_data         equil.data

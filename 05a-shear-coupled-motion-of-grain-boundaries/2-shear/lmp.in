@@ -1,0 +1,42 @@
+dimension          3
+boundary           p p s
+units              metal
+atom_style         atomic
+
+# Physics of the system ################################################
+
+read_data          ../1-equilibrate/equil.data
+
+mass               1  63.546 # Cu
+
+pair_style         eam/alloy
+pair_coeff         * * ../../Cu01.eam.alloy Cu
+
+timestep           0.002
+
+region             top    block  EDGE EDGE  EDGE EDGE  25 EDGE
+region             bottom block  EDGE EDGE  EDGE EDGE  EDGE -27
+group              top    region top
+group              bottom region bottom
+
+group              mobile subtract  all  top bottom
+
+# Output ###############################################################
+
+thermo_style       custom step temp pe ke etotal enthalpy press vol    &
+                   lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
+                   cpu cpuremain
+thermo_modify      norm no  flush yes
+thermo             100
+
+dump               MyDump all custom 10000 structure.dump.*.gz         &
+                   id type x y z vx vy vz ix iy iz
+dump_modify        MyDump pad 10
+
+# Run ##################################################################
+
+fix                1 mobile nvt temp 500 500 0.1
+fix                2 bottom move linear 0 0 0
+fix                3 top    move linear 0 0.01 0
+
+run                500000
