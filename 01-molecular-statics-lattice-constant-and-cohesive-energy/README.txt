@@ -14,10 +14,11 @@ Prerequisites
 
 We will need the following software:
 
-* A recent LAMMPS version, obviously. See <https://lammps.sandia.gov/>.
-  Have a quick look at its documentation and install it in whatever
-  way is practical for you. Be sure to have at least the packages
-  "COMPRESS", "MANYBODY", "RIGID", and "REPLICA" installed.
+* A recent LAMMPS version, obviously. See <https://lammps.org/>. Have
+  a quick look at its documentation and install it in whatever way is
+  practical for you. Be sure to have at least the packages "COMPRESS",
+  "MANYBODY", "RIGID", and "REPLICA" installed. If possible, also
+  install the "VORONOI" package.
 
 * Python 3 with numpy and scipy. You need this anyway.
 

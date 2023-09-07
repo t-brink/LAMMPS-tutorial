@@ -16,11 +16,11 @@ dimension          3
 # adjusted to fit all atoms inside. That is often preferable.
 boundary           p p p
 
-# LAMMPS can work in different unit system, but we are constrained by
+# LAMMPS can work in different unit systems, but we are constrained by
 # the units used in the potential input file. In materials science,
 # most people and virtually all potentials use "metal" units. Have a
 # look at the LAMMPS documentation what the units are for different
-# properties, because this is not a very consistent scheme (like SI).
+# properties, because this is not a very consistent scheme (unlike SI).
 units              metal
 
 # There are different "atom_style"s, of which "atomic" is the
@@ -32,28 +32,18 @@ atom_style         atomic
 # Physics of the system ################################################
 
 # Here, we read the initial positions and velocities of our
-# atoms. LAMMPS can read gzipped files, but this often fails when
+# atoms. LAMMPS can read gzipped files, but this sometimes fails when
 # using MPI, where workarounds might be needed (or just use a plain,
-# non-zipped file).
+# non-zipped file). Nowadays, it should be fine.
 #
 # The format of the data file is given by atom_style. Check the
 # documentation for details. For now, ASE has done the work for us of
 # creating and formatting this input file.
 read_data          Cu-fcc.data.gz
 
-# We need to always set the mass of all elements, even if it plays no
-# role. For example, for most molecular statics algorithms, the mass
-# is simply ignored, since there are no kinetics at play.
-#
-# Atom types are numbers that are mapped to real elements (or fantasy
-# particles if you so choose) by assigning the correct mass and
-# potential parameters. For the mass, I usually just take the average
-# from the periodic table. I like to add a comment at the end to
-# remember what element it is, but this is optional.
-mass               1  63.546 # Cu
-
 # Now the heart of any classical MD simulation: The potential. You
-# need to first provide the type of "style" of the potential.
+# need to first define "style" of the potential, i.e., which type it
+# is (EAM, Tersoff-like, Lennard-Jones, ...).
 pair_style         eam/alloy
 
 # Then come the parameters. For some simple potential styles, you can
@@ -68,6 +58,20 @@ pair_style         eam/alloy
 # each atom type we have. Here, we only have one type and it is
 # copper.
 pair_coeff         * * ../Cu01.eam.alloy Cu
+
+# We need to always set the mass of all elements, even if it plays no
+# role. For example, for most molecular statics algorithms, the mass
+# is simply ignored, since there are no kinetics at play. Some potential
+# types already contain information about the mass and override this. I
+# don't like the inconsistency and always define the masses after the
+# potential.
+#
+# Atom types are numbers that are mapped to real elements (or fantasy
+# particles if you so choose) by assigning the correct mass and
+# potential parameters. For the mass, I usually just take the average
+# from the periodic table. I like to add a comment at the end to
+# remember what element it is, but this is optional.
+mass               1  63.546 # Cu
 
 # Output ###############################################################
 
@@ -100,7 +104,7 @@ thermo_modify      norm no  flush yes
 
 # How often should thermodynamic data be written. Given in
 # timesteps. Make this as small as necessary, but not too small,
-# otherwise the log file is way too big and how-density data is
+# otherwise the log file is way too big and high-density data is
 # useless in most cases.
 #
 # As a rule of thumb, I use "10" for molecular statics and "100" for

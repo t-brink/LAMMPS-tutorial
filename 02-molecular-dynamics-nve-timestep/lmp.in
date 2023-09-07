@@ -13,10 +13,10 @@ atom_style         atomic
 # Re-use the input file from the last step.
 read_data          ../01-molecular-statics-lattice-constant-and-cohesive-energy/Cu-fcc.data.gz
 
-mass               1  63.546 # Cu
-
 pair_style         eam/alloy
 pair_coeff         * * ../Cu01.eam.alloy Cu
+
+mass               1  63.546 # Cu
 
 # For dynamics, we need a time integration algorithm. This here is the
 # default style, a velocity Verlet. We will likely never need anything

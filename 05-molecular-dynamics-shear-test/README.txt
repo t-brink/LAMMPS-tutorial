@@ -1,7 +1,7 @@
 Background
 ==========
 
-In all previous step, we used orthogonal simulation boxes. We will now
+In all previous steps, we used orthogonal simulation boxes. We will now
 look at sheared systems.
 
 There is not much to it, but you should take note on the limitations
@@ -13,7 +13,7 @@ LAMMPS issues
 First, LAMMPS does not support sheared cells by default. A cell needs
 to be converted to be "triclinic". A lot of details can be found at
 
-    <https://lammps.sandia.gov/doc/Howto_triclinic.html>.
+    <https://docs.lammps.org/Howto_triclinic.html>
 
 You can switch between both cases using
 
@@ -100,9 +100,9 @@ We are quite happy with ignoring these complexities for now. Instead,
 we will look at plastic events in the simulation. For this, we need to
 visualize the atomic positions. LAMMPS can produce "dump files"
 containing all sorts of per-atom information. These are quite
-flexible, but I tend to use somthing like this:
+flexible, but I tend to use something like this:
 
-    dump         MyDump all custom 10000 structure.dump.*            &
+    dump         MyDump all custom/gz 10000 structure.dump.*.gz       &
                  id type x y z vx vy vz ix iy iz
     dump_modify  MyDump pad 10
 
@@ -127,7 +127,7 @@ This data, together with the interatomic potential, completely
 describe the state of the system. Energies, forces, stresses, etc. can
 be derived.
 
-The file names are all of the format "structure.dump.*", where "*" is
+The file names are all of the format "structure.dump.*.gz", where "*" is
 replaced with the timestep. The "dump_modify" command enforces that
 the timestep will be left-padded with zeros until the string has
 length 10. This ensures correct sorting in file managers and on the

@@ -13,10 +13,10 @@ atom_style         atomic
 
 read_data          S5-100-210.data.gz
 
-mass               1  63.546 # Cu
-
 pair_style         eam/alloy
 pair_coeff         * * ../Cu01.eam.alloy Cu
+
+mass               1  63.546 # Cu
 
 # Output ###############################################################
 
@@ -46,7 +46,7 @@ group              gbgrp region gb
 compute            pe all pe/atom
 
 # Get the sum of potential energies around the grain boundary. This
-# reference the previous compute "pe". LAMMPS is a bit weird here and
+# references the previous compute "pe". LAMMPS is a bit weird here and
 # requires the prefix "c_" for all computes, "v_" for variables, and
 # "f_" for fixes.
 compute            gbpe gbgrp reduce sum c_pe
@@ -54,7 +54,7 @@ compute            gbpe gbgrp reduce sum c_pe
 # Now we need to subtract the reference fcc energy. If the formula for
 # the variable contains spaces, it needs to be in quotes.
 #
-# The function "count()" return the number of atoms in the group.
+# The function "count()" returns the number of atoms in the group.
 #
 # lx and ly are the box lengths in x and y.
 #
@@ -86,13 +86,16 @@ variable           tau11 equal "c_xx / (lx * ly) * 1e-5"
 
 compute            yy gbgrp reduce sum c_stress[2]
 variable           tau22 equal "c_yy / (lx * ly) * 1e-5"
+
+compute            xy gbgrp reduce sum c_stress[4]
+variable           tau12 equal "c_xy / (lx * ly) * 1e-5"
 # For symmetric grain boundaries, the other components are zero. See,
 # again, the Frolov/Mishin paper.
 
 # We add the values computed above to the thermo output.
 thermo_style       custom step temp pe ke etotal enthalpy press vol    &
                    lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
-                   v_Egb v_tau11 v_tau22                               &
+                   v_Egb v_tau11 v_tau22 v_tau12                       &
                    cpu cpuremain
 thermo_modify      norm no  flush yes
 thermo             100

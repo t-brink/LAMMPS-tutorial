@@ -1,6 +1,6 @@
-This is a tutorial for LAMMPS <https://lammps.sandia.gov>. Just go
-through all directories in order, starting by reading the README.txt
-and following the instructions.
+This is a tutorial for LAMMPS <https://lammps.org>. Just go through
+all directories in order, starting by reading the README.txt and
+following the instructions.
 
 There are also additional tutorials that are optional. You can skip
 them if they do not sound interesting. Or revisit them later. The
