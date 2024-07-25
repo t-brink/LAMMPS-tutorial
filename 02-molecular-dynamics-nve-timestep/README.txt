@@ -34,6 +34,14 @@ numbers, so it is quite fast to make a quick plot.
 
 - What happens to the temperature? Why? Can you fix this?
 
+  Hint: Consider the output obtained in step 1. We got two values.
+        Which properties of the system were allowed to change in
+        step 1 and which properties are fixed/allowed to change in
+        the current step (i.e., which ensemble are we using)? Given
+        this, how does the input of step 2 compare to the output of
+        step 1? Can you find out now where the temperature comes
+        from?
+
 - If you modified the simulation correctly, you should get a
   temperature of 150 K. Why? Because of the equipartition theorem.
   Half of the kinetic energy we inserted gets converted to potential

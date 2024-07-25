@@ -37,8 +37,11 @@ direction with the command
 
     replicate 3 1 1
 
-immediately after "read_data" (see documentation for details, but this
-one is quite straightforward).
+immediately after using either "read_data" or "create_atoms" (see
+documentation for details, but this one is quite straightforward). Of
+course, we could just change the size of the box in the
+"create_input.py" script or in the equivalent commands in LAMMPS. The
+replicate command is, however, a useful command to know.
 
 Furthermore, we want to store the atomic positions and velocities
 after equilibration in order to reuse them in the next step. This can

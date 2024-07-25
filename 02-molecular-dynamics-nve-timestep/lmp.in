@@ -10,8 +10,28 @@ atom_style         atomic
 
 # Physics of the system ################################################
 
-# Re-use the input file from the last step.
-read_data          ../01-molecular-statics-lattice-constant-and-cohesive-energy/Cu-fcc.data.gz
+# Instead of creating the input file externally with ASE, we can also
+# use LAMMPS itself to create the structure. Which one to use is a
+# matter of taste and of the specific capabilities of the tools used
+# to create the simulations. For a simple simulation cell with fcc
+# atoms it doesn't matter much. I personally find the command below
+# hard to remember compared to the ASE script.
+#
+# First, we need to define a crystal lattice and its lattice constant:
+lattice            fcc 4.0
+# Then, we need to tell LAMMPS how many unit cells to produce in each
+# direction. This is done with a region. Here, we want 10x10x10 (cubic)
+# unit cells. The region will also define the simulation cell.
+region             boxregion block 0 10  0 10  0 10
+# Then we actually create the box and the atoms. The number in the
+# create_box command defines how many different atom types we have in
+# this simulation (here only one). The number in the create_atoms
+# command tells it which atom type the created atoms should have. The
+# argument "box" simply means to fill the whole box. The command
+# automatically uses the defined lattice.
+create_box         1 boxregion
+create_atoms       1 box
+
 
 pair_style         eam/alloy
 pair_coeff         * * ../Cu01.eam.alloy Cu
