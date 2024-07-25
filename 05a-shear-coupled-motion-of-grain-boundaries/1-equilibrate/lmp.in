@@ -22,10 +22,10 @@ timestep           0.002
 thermo_style       custom step temp pe ke etotal enthalpy press vol    &
                    lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
                    cpu cpuremain
-thermo_modify      norm no  flush yes
+thermo_modify      norm no  flush yes  format float %20.15g
 thermo             100
 
-dump               MyDump all custom 10000 structure.dump.*.gz         &
+dump               MyDump all custom/gz 10000 structure.dump.*.gz      &
                    id type x y z vx vy vz ix iy iz
 dump_modify        MyDump pad 10
 

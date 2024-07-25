@@ -97,7 +97,7 @@ thermo_style       custom step temp pe ke etotal enthalpy press vol    &
                    lx ly lz xy xz yz pxx pyy pzz pxy pxz pyz atoms     &
                    v_Egb v_tau11 v_tau22 v_tau12                       &
                    cpu cpuremain
-thermo_modify      norm no  flush yes
+thermo_modify      norm no  flush yes  format float %20.15g
 thermo             100
 
 # Run ##################################################################

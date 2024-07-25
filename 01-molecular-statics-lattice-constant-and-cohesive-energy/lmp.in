@@ -100,7 +100,13 @@ thermo_style       custom step temp pe ke etotal enthalpy press vol    &
 #    "flush yes" - do not buffer output (if this is omitted, the log file
 #                  might be incomplete until the simulation is finished;
 #                  it is less efficient for I/O, though)
-thermo_modify      norm no  flush yes
+#    "format"    - here, floating point numbers ("float") are printed
+#                  with 15 significant digits, which corresponds roughly
+#                  to the precision that IEEE 754 double-precision floats
+#                  can achieve in computer memory. We want to avoid
+#                  needlessly losing precision, since the difference in
+#                  storage space compared to the default is small.
+thermo_modify      norm no  flush yes  format float %20.15g
 
 # How often should thermodynamic data be written. Given in
 # timesteps. Make this as small as necessary, but not too small,
